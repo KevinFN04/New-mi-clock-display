@@ -1,3 +1,5 @@
+//Importa la clase estatica Calendar para obtener la fecha actual.
+import java.util.Calendar;
 
 /**
  * Write a description of class ClockDisplay here.
@@ -7,69 +9,151 @@
  */
 public class ClockDisplay
 {
-    //Variable de las horas
+    // Guarda la hora
     private NumberDisplay horas;
-    //Variale de los minutos
+    // Guarda los minutos
     private NumberDisplay minutos;
-    //Variable String de 5 digitos con ls hora
-    private String horaSt;
-    
+    // Guarda el año
+    private NumberDisplay anyo;
+    // Guarda el dia
+    private NumberDisplay dia;
+    // Guarda el mes
+    private NumberDisplay mes;
+    // Almacena la hora actual con 5 caracteres
+    private String horaActual;
+    // Permite elegir si estamos en formato 12 horas(true) o 24 horas(false)
+    private boolean relojDe12Horas;
 
     /**
-     * Constructor para poner la hora a cero al iniciar.
+     * Crea un objeto ClockDisplay con hora por defecto 00:00 y la fecha Actual.
      */
     public ClockDisplay()
     {
+        Calendar fecha = Calendar.getInstance();
+        int diaAc = fecha.get(Calendar.DAY_OF_MONTH);
+        int mesAc = fecha.get(Calendar.MONTH); 
+        int anyoAc = fecha.get(Calendar.YEAR)%100;
+        
         horas = new NumberDisplay(24);
-        horas.setValue(0);
         minutos = new NumberDisplay(60);
-        minutos.setValue(0);
-        horaSt = "00:00";
+        dia = new NumberDisplay(31);
+        mes = new NumberDisplay(13);
+        anyo = new NumberDisplay(99);
+        
+        dia.setValue(diaAc);
+        mes.setValue(mesAc + 1);
+        anyo.setValue(anyoAc);
+        
+        horaActual = horas.getDisplayValue() + ":" + minutos.getDisplayValue() + "," + dia.getDisplayValue() 
+        + "/" + mes.getDisplayValue() + "/" + anyo.getDisplayValue();
     }
-    
-    /**
-     * Constructor para fijar una hora al iniciar.
+
+    /** 
+     * Crea un objeto ClockDisplay con la hora, minutos y fecha dados
      */
-    public ClockDisplay(int horaAc, int minutosAc)
+    public ClockDisplay (int horasX, int minutosX, int diaX, int mesX, int anyoX, boolean formato)
     {
-        horas = new NumberDisplay(24);
-        horas.setValue(horaAc);
+        horas =   new NumberDisplay(24);
         minutos = new NumberDisplay(60);
-        minutos.setValue(minutosAc);
-        horaSt = horas.getDisplayValue() + ":" + minutos.getDisplayValue();
+        dia = new NumberDisplay(31);
+        mes = new NumberDisplay(13);
+        anyo = new NumberDisplay(99);
+        dia.setValue(diaX);
+        mes.setValue(mesX);
+        anyo.setValue(anyoX);
+        horas.setValue(horasX); 
+        minutos.setValue(minutosX);
+        relojDe12Horas = formato;
+        updateTime();
     }
-    
-        /**
-     * Metodo para fijar la hora
-     */ 
-    public void setTime(int horaAc, int minutosAc)
+
+    /**
+     * Fija la hora del reloj a la hora, minutos y fecha dados
+     */
+    public void setTime(int horaY, int minutoY, int diaY, int mesY, int anyoY)
     {
-        horas.setValue(horaAc);
-        minutos.setValue(minutosAc);
-        horaSt = horas.getDisplayValue() + ":" + minutos.getDisplayValue();
+        horas.setValue(horaY);  
+        minutos.setValue(minutoY);
+        dia.setValue(diaY);
+        mes.setValue(mesY);
+        anyo.setValue(anyoY);
+        updateTime();
     }
-    
-        /**
-     * Metodo para devolver la hora.
-     */ 
+
+    /**
+     * Devuelve la hora y fecha del reloj como una cadena de caracteres
+     */
     public String getTime()
     {
-        return horaSt;
+        return horaActual;
+    }
+
+    /**
+     * Hace avanzar la hora 1 minuto
+     */
+    public void timeTick()
+    {
+        minutos.increment();
+        if ( minutos.getValue() == 0){
+            horas.increment();
+        }
+        if (horas.getValue() == 0 && minutos.getValue() == 0){
+            dia.increment();
+        }
+        if (dia.getValue() == 0){
+            dia.increment();
+            mes.increment();
+        }
+        if (mes.getValue() == 0){
+            mes.increment();
+            anyo.increment();
+        }
+        
+        updateTime();
+    }
+
+    /**
+     * Actualiza el atributo horaActual siguiendo las normas de un
+     * reloj de 12 horas.
+     */
+    public void updateTime()
+    {
+        if (relojDe12Horas) {
+            String formato = "a.m";
+            int horaAhora = horas.getValue(); 
+            if (horaAhora >= 12){
+                formato = "p.m.";
+            }
+
+            if (horaAhora > 12) {
+                horaAhora = horaAhora - 12;
+            }
+            else if (horaAhora == 0) {
+                horaAhora = 12;
+            }
+            horaActual = horaAhora + ":" + minutos.getDisplayValue() + " " + formato + ", " + dia.getDisplayValue() 
+            + "/" + mes.getDisplayValue() + "/" + anyo.getDisplayValue();
+        }
+        else {
+            horaActual = horas.getDisplayValue() + ":" + minutos.getDisplayValue() + ", " + dia.getDisplayValue() 
+            + "/" + mes.getDisplayValue() + "/" + anyo.getDisplayValue();    
+        }
     }
     
     /**
-     * Metodo para pasar los minutos y las horas.
-     */ 
-    public void timeTick()
+     * Método que permite alternar entre los modos del reloj
+     */
+    public void changeFormat()
     {
-        if (minutos.getValue() == 59){
-            minutos.increment();
-            horas.increment();
-            horaSt = horas.getDisplayValue() + ":" + minutos.getDisplayValue();
-        }
-        else{
-            minutos.increment();
-            horaSt = horas.getDisplayValue() + ":" + minutos.getDisplayValue(); 
-        }
+        relojDe12Horas = !relojDe12Horas;
+        updateTime();   
     }
 }
+
+
+
+
+
+
+
+
